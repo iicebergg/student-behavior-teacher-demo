@@ -11,11 +11,23 @@ import type { Topic } from '../data/types';
 import { STATE_SHAPES, isHollow, markPath, stateColor, topicColor } from './palette';
 
 /** The state's mark, at legend size. */
-export function StateGlyph({ state, size = 13 }: { state: BehavioralState; size?: number }): ReactNode {
+export function StateGlyph({
+  state,
+  size = 13,
+}: {
+  state: BehavioralState;
+  size?: number;
+}): ReactNode {
   const shape = STATE_SHAPES[state];
   const hollow = isHollow(shape);
   return (
-    <svg width={size + 4} height={size + 4} viewBox={`0 0 ${size + 4} ${size + 4}`} aria-hidden="true" style={{ flex: 'none' }}>
+    <svg
+      width={size + 4}
+      height={size + 4}
+      viewBox={`0 0 ${size + 4} ${size + 4}`}
+      aria-hidden="true"
+      style={{ flex: 'none' }}
+    >
       <path
         d={markPath(shape, (size + 4) / 2, (size + 4) / 2, size)}
         style={{
@@ -68,7 +80,12 @@ export function ChangepointLegend({ showReturns }: { showReturns: boolean }): Re
     <div className="legend">
       <span className="legend-item">
         <svg width={15} height={15} viewBox="0 0 15 15" aria-hidden="true" style={{ flex: 'none' }}>
-          <circle cx={7.5} cy={7.5} r={2.8} style={{ fill: 'var(--surface-1)', stroke: 'var(--text-muted)', strokeWidth: 1.4 }} />
+          <circle
+            cx={7.5}
+            cy={7.5}
+            r={2.8}
+            style={{ fill: 'var(--surface-1)', stroke: 'var(--text-muted)', strokeWidth: 1.4 }}
+          />
         </svg>
         <span>changepoint (the state changed)</span>
       </span>
@@ -82,8 +99,17 @@ export function ChangepointLegend({ showReturns }: { showReturns: boolean }): Re
       </span>
       {showReturns && (
         <span className="legend-item">
-          <svg width={22} height={15} viewBox="0 0 22 15" aria-hidden="true" style={{ flex: 'none' }}>
-            <path d="M 1 11 C 6 1, 16 1, 21 11" style={{ fill: 'none', stroke: 'var(--accent)', strokeWidth: 2 }} />
+          <svg
+            width={22}
+            height={15}
+            viewBox="0 0 22 15"
+            aria-hidden="true"
+            style={{ flex: 'none' }}
+          >
+            <path
+              d="M 1 11 C 6 1, 16 1, 21 11"
+              style={{ fill: 'none', stroke: 'var(--accent)', strokeWidth: 2 }}
+            />
           </svg>
           <span>return: the loop back to a question left blank</span>
         </span>

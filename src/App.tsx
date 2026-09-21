@@ -149,8 +149,16 @@ export default function App(): ReactNode {
                   label="View mode"
                   value={viewMode}
                   options={[
-                    { value: 'by-question', label: 'By question', title: 'Question number on the x axis, with back-arcs for returns' },
-                    { value: 'by-visit', label: 'By visit order', title: 'The same path straightened left to right' },
+                    {
+                      value: 'by-question',
+                      label: 'By question',
+                      title: 'Question number on the x axis, with back-arcs for returns',
+                    },
+                    {
+                      value: 'by-visit',
+                      label: 'By visit order',
+                      title: 'The same path straightened left to right',
+                    },
                   ]}
                   onChange={setViewMode}
                 />
@@ -374,10 +382,9 @@ export default function App(): ReactNode {
                 </tbody>
               </table>
               <p className="card-footnote">
-                Rapid thresholds run from{' '}
-                {Math.min(...dataset.rapidThresholds.values()).toFixed(1)}s to{' '}
-                {Math.max(...dataset.rapidThresholds.values()).toFixed(1)}s, each one 30% of that
-                question's median per-visit time, capped at 10s.
+                Rapid thresholds run from {Math.min(...dataset.rapidThresholds.values()).toFixed(1)}
+                s to {Math.max(...dataset.rapidThresholds.values()).toFixed(1)}s, each one 30% of
+                that question's median per-visit time, capped at 10s.
               </p>
             </Card>
           </div>

@@ -23,7 +23,12 @@ export function StudentPicker({
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <button type="button" className="button" onClick={() => step(-1)} aria-label="Previous student">
+      <button
+        type="button"
+        className="button"
+        onClick={() => step(-1)}
+        aria-label="Previous student"
+      >
         ‹
       </button>
       <select

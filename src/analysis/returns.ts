@@ -201,8 +201,7 @@ export function computeReturns(
 
   const returnCorrect = links.filter((link) => link.returnWasCorrect).length;
   const gaps = links.map((link) => link.gapInVisits).sort((a, b) => a - b);
-  const medianGapInVisits =
-    gaps.length === 0 ? 0 : (gaps[Math.floor(gaps.length / 2)] as number);
+  const medianGapInVisits = gaps.length === 0 ? 0 : (gaps[Math.floor(gaps.length / 2)] as number);
 
   const returnCorrectRate = links.length > 0 ? returnCorrect / links.length : 0;
   const firstPassCorrectRate = firstPassTotal > 0 ? firstPassCorrect / firstPassTotal : 0;

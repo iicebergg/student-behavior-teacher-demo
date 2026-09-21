@@ -50,7 +50,8 @@ export function topicWash(topicId: number, percent = 15): string {
 }
 
 /** The mark shape for each state: filled = answered, hollow = blank. */
-export type MarkShape = 'circle' | 'triangle-down' | 'diamond' | 'chevron' | 'ring' | 'hollow-square';
+export type MarkShape =
+  'circle' | 'triangle-down' | 'diamond' | 'chevron' | 'ring' | 'hollow-square';
 
 export const STATE_SHAPES: Readonly<Record<BehavioralState, MarkShape>> = {
   C: 'circle',

@@ -53,8 +53,14 @@ export function ReturnsPanel({ summary }: { summary: ReturnsSummary }): ReactNod
         />
         <Stat
           label="Difference"
-          value={noReturns ? '—' : `${summary.correctnessGap >= 0 ? '+' : '−'}${percent(Math.abs(summary.correctnessGap), 0)}`}
-          sub={noReturns ? '—' : summary.correctnessGap >= 0 ? 'returning helps' : 'returning hurts'}
+          value={
+            noReturns
+              ? '—'
+              : `${summary.correctnessGap >= 0 ? '+' : '−'}${percent(Math.abs(summary.correctnessGap), 0)}`
+          }
+          sub={
+            noReturns ? '—' : summary.correctnessGap >= 0 ? 'returning helps' : 'returning hurts'
+          }
         />
       </div>
 

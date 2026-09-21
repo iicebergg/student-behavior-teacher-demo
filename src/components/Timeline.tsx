@@ -84,7 +84,10 @@ function arcPath(
   const top = Math.max(ceiling, Math.min(y1, y2) - rise);
   const apexX = (x1 + x2) / 2;
   const apexY = (y1 + y2 + 6 * top) / 8;
-  return { d: `M ${x1} ${y1} C ${x1} ${top}, ${x2} ${top}, ${x2} ${y2}`, apex: [apexX, apexY] };
+  return {
+    d: `M ${x1} ${y1} C ${x1} ${top}, ${x2} ${top}, ${x2} ${y2}`,
+    apex: [apexX, apexY],
+  };
 }
 
 export function Timeline({
@@ -163,323 +166,347 @@ export function Timeline({
   const dimOthers = layers.returns;
 
   return (
-    <div className="chart-wrap" ref={wrapRef}>
-      <svg
-        viewBox={`0 0 ${VIEW_WIDTH} ${lay.height}`}
-        role="img"
-        aria-label={`Behavioural timeline across ${questions.length} questions, ${attempt.path.length} visits in temporal order.`}
-      >
-        {/* Topic layer, behind everything else */}
-        {layers.topics && (
-          <g aria-hidden="true">
-            {viewMode === 'by-visit' &&
-              placed.map((item) => (
-                <rect
-                  key={`band-${item.visit.pathIndex}`}
-                  x={item.x - columnWidth / 2}
-                  y={MARGIN.top}
-                  width={Math.max(0.5, columnWidth - 0.4)}
-                  height={lay.stripY - MARGIN.top}
-                  style={{ fill: topicColor(item.topicId), opacity: 0.075 }}
-                />
-              ))}
-            {viewMode === 'by-question' &&
-              questions.map((question) => {
-                const x = MARGIN.left + (question.questionNumber - 1) * columnWidth;
-                return (
-                  <g key={`topic-${question.questionNumber}`}>
-                    <rect
-                      x={x}
-                      y={MARGIN.top}
-                      width={columnWidth}
-                      height={lay.stripY - MARGIN.top}
-                      style={{ fill: topicColor(question.topicId), opacity: 0.075 }}
-                    />
-                    <rect
-                      x={x + 0.5}
-                      y={lay.stripY}
-                      width={Math.max(0.5, columnWidth - 1)}
-                      height={STRIP_H}
-                      rx={1.5}
-                      style={{ fill: topicColor(question.topicId), opacity: 0.85 }}
-                    />
-                  </g>
-                );
-              })}
-            {viewMode === 'by-visit' &&
-              placed.map((item) => (
-                <rect
-                  key={`strip-${item.visit.pathIndex}`}
-                  x={item.x - columnWidth / 2 + 0.3}
-                  y={lay.stripY}
-                  width={Math.max(0.5, columnWidth - 0.6)}
-                  height={STRIP_H}
-                  rx={1.5}
-                  style={{ fill: topicColor(item.topicId), opacity: 0.85 }}
-                />
-              ))}
-          </g>
-        )}
+    <div className="chart-scroll">
+      <div className="chart-wrap" ref={wrapRef}>
+        <svg
+          viewBox={`0 0 ${VIEW_WIDTH} ${lay.height}`}
+          role="img"
+          aria-label={`Behavioural timeline across ${questions.length} questions, ${attempt.path.length} visits in temporal order.`}
+        >
+          {/* Topic layer, behind everything else */}
+          {layers.topics && (
+            <g aria-hidden="true">
+              {viewMode === 'by-visit' &&
+                placed.map((item) => (
+                  <rect
+                    key={`band-${item.visit.pathIndex}`}
+                    x={item.x - columnWidth / 2}
+                    y={MARGIN.top}
+                    width={Math.max(0.5, columnWidth - 0.4)}
+                    height={lay.stripY - MARGIN.top}
+                    style={{ fill: topicColor(item.topicId), opacity: 0.075 }}
+                  />
+                ))}
+              {viewMode === 'by-question' &&
+                questions.map((question) => {
+                  const x = MARGIN.left + (question.questionNumber - 1) * columnWidth;
+                  return (
+                    <g key={`topic-${question.questionNumber}`}>
+                      <rect
+                        x={x}
+                        y={MARGIN.top}
+                        width={columnWidth}
+                        height={lay.stripY - MARGIN.top}
+                        style={{
+                          fill: topicColor(question.topicId),
+                          opacity: 0.075,
+                        }}
+                      />
+                      <rect
+                        x={x + 0.5}
+                        y={lay.stripY}
+                        width={Math.max(0.5, columnWidth - 1)}
+                        height={STRIP_H}
+                        rx={1.5}
+                        style={{
+                          fill: topicColor(question.topicId),
+                          opacity: 0.85,
+                        }}
+                      />
+                    </g>
+                  );
+                })}
+              {viewMode === 'by-visit' &&
+                placed.map((item) => (
+                  <rect
+                    key={`strip-${item.visit.pathIndex}`}
+                    x={item.x - columnWidth / 2 + 0.3}
+                    y={lay.stripY}
+                    width={Math.max(0.5, columnWidth - 0.6)}
+                    height={STRIP_H}
+                    rx={1.5}
+                    style={{ fill: topicColor(item.topicId), opacity: 0.85 }}
+                  />
+                ))}
+            </g>
+          )}
 
-        {/* Lane guides */}
-        <g aria-hidden="true">
-          {twoLane && (
+          {/* Lane guides */}
+          <g aria-hidden="true">
+            {twoLane && (
+              <line
+                x1={MARGIN.left}
+                x2={VIEW_WIDTH - MARGIN.right}
+                y1={lay.laneReturn}
+                y2={lay.laneReturn}
+                style={{
+                  stroke: 'var(--gridline)',
+                  strokeWidth: 1,
+                  strokeDasharray: '2 4',
+                }}
+              />
+            )}
             <line
               x1={MARGIN.left}
               x2={VIEW_WIDTH - MARGIN.right}
-              y1={lay.laneReturn}
-              y2={lay.laneReturn}
-              style={{ stroke: 'var(--gridline)', strokeWidth: 1, strokeDasharray: '2 4' }}
+              y1={lay.laneFirst}
+              y2={lay.laneFirst}
+              style={{ stroke: 'var(--gridline)', strokeWidth: 1 }}
             />
-          )}
-          <line
-            x1={MARGIN.left}
-            x2={VIEW_WIDTH - MARGIN.right}
-            y1={lay.laneFirst}
-            y2={lay.laneFirst}
-            style={{ stroke: 'var(--gridline)', strokeWidth: 1 }}
-          />
-          {twoLane && (
-            <>
-              <text x={MARGIN.left - 6} y={lay.laneReturn + 3} textAnchor="end" className="axis-label">
-                return
-              </text>
-              <text x={MARGIN.left - 6} y={lay.laneFirst + 3} textAnchor="end" className="axis-label">
-                first
-              </text>
-            </>
-          )}
-        </g>
+            {twoLane && (
+              <>
+                <text
+                  x={MARGIN.left - 6}
+                  y={lay.laneReturn + 3}
+                  textAnchor="end"
+                  className="axis-label"
+                >
+                  return
+                </text>
+                <text
+                  x={MARGIN.left - 6}
+                  y={lay.laneFirst + 3}
+                  textAnchor="end"
+                  className="axis-label"
+                >
+                  first
+                </text>
+              </>
+            )}
+          </g>
 
-        {/* The path, in temporal order */}
-        <g fill="none">
-          {edges.map((edge) => {
-            if (edge === null) return null;
-            const highlight = layers.returns && edge.isReturnEdge;
-            const dim = dimOthers && !edge.isReturnEdge;
-            return (
-              <path
-                key={`edge-${edge.index}`}
-                d={edge.geometry.d}
-                style={{
-                  stroke: highlight ? 'var(--accent)' : 'var(--text-muted)',
-                  strokeWidth: highlight ? 2.4 : 1.4,
-                  opacity: dim ? 0.18 : edge.backward ? 0.85 : 0.55,
-                  strokeLinecap: 'round',
-                }}
-              />
-            );
-          })}
-        </g>
-
-        {/* Arrowheads on the loop-back edges, when returns are emphasised */}
-        {layers.returns && (
-          <g aria-hidden="true">
+          {/* The path, in temporal order */}
+          <g fill="none">
             {edges.map((edge) => {
-              if (edge === null || !edge.isReturnEdge || !edge.backward) return null;
-              const [ax, ay] = edge.geometry.apex;
+              if (edge === null) return null;
+              const highlight = layers.returns && edge.isReturnEdge;
+              const dim = dimOthers && !edge.isReturnEdge;
               return (
                 <path
-                  key={`arrow-${edge.index}`}
-                  d={`M ${ax + 5} ${ay - 4.5} L ${ax - 4} ${ay} L ${ax + 5} ${ay + 4.5} Z`}
-                  style={{ fill: 'var(--accent)' }}
-                />
-              );
-            })}
-          </g>
-        )}
-
-        {/* Blank-to-return pairs: the two visits share a question but not a slot in the path */}
-        {layers.returns && twoLane && (
-          <g aria-hidden="true">
-            {links.map((link) => {
-              const target = placed.find(
-                (item) => item.visit.pathIndex === link.returnVisitPathIndex,
-              );
-              if (target === undefined) return null;
-              return (
-                <line
-                  key={`pair-${link.questionNumber}`}
-                  x1={target.x}
-                  x2={target.x}
-                  y1={lay.laneReturn + 7}
-                  y2={lay.laneFirst - 7}
+                  key={`edge-${edge.index}`}
+                  d={edge.geometry.d}
                   style={{
-                    stroke: 'var(--accent)',
-                    strokeWidth: 1.2,
-                    strokeDasharray: '2 3',
-                    opacity: 0.8,
+                    stroke: highlight ? 'var(--accent)' : 'var(--text-muted)',
+                    strokeWidth: highlight ? 2.4 : 1.4,
+                    opacity: dim ? 0.18 : edge.backward ? 0.85 : 0.55,
+                    strokeLinecap: 'round',
                   }}
                 />
               );
             })}
           </g>
-        )}
 
-        {/* Return links in the straightened view: the pair the analysis walks */}
-        {layers.returns && !twoLane && (
-          <g fill="none" aria-hidden="true">
-            {links.map((link) => {
-              const from = placed.find(
-                (item) => item.visit.pathIndex === link.blankVisitPathIndex,
-              );
-              const to = placed.find((item) => item.visit.pathIndex === link.returnVisitPathIndex);
-              if (from === undefined || to === undefined) return null;
-              const { d } = arcPath(from.x, from.y - 7, to.x, to.y - 7, lay.arcCeiling);
-              return (
-                <path
-                  key={`link-${link.questionNumber}`}
-                  d={d}
-                  style={{
-                    stroke: 'var(--accent)',
-                    strokeWidth: 1.2,
-                    strokeDasharray: '3 3',
-                    opacity: 0.75,
-                  }}
-                />
-              );
-            })}
-          </g>
-        )}
+          {/* Arrowheads on the loop-back edges, when returns are emphasised */}
+          {layers.returns && (
+            <g aria-hidden="true">
+              {edges.map((edge) => {
+                if (edge === null || !edge.isReturnEdge || !edge.backward) return null;
+                const [ax, ay] = edge.geometry.apex;
+                return (
+                  <path
+                    key={`arrow-${edge.index}`}
+                    d={`M ${ax + 5} ${ay - 4.5} L ${ax - 4} ${ay} L ${ax + 5} ${ay + 4.5} Z`}
+                    style={{ fill: 'var(--accent)' }}
+                  />
+                );
+              })}
+            </g>
+          )}
 
-        {/* Changepoint layer, on the path edges */}
-        {layers.changepoints && (
+          {/* Blank-to-return pairs: the two visits share a question but not a slot in the path */}
+          {layers.returns && twoLane && (
+            <g aria-hidden="true">
+              {links.map((link) => {
+                const target = placed.find(
+                  (item) => item.visit.pathIndex === link.returnVisitPathIndex,
+                );
+                if (target === undefined) return null;
+                return (
+                  <line
+                    key={`pair-${link.questionNumber}`}
+                    x1={target.x}
+                    x2={target.x}
+                    y1={lay.laneReturn + 7}
+                    y2={lay.laneFirst - 7}
+                    style={{
+                      stroke: 'var(--accent)',
+                      strokeWidth: 1.2,
+                      strokeDasharray: '2 3',
+                      opacity: 0.8,
+                    }}
+                  />
+                );
+              })}
+            </g>
+          )}
+
+          {/* Return links in the straightened view: the pair the analysis walks */}
+          {layers.returns && !twoLane && (
+            <g fill="none" aria-hidden="true">
+              {links.map((link) => {
+                const from = placed.find(
+                  (item) => item.visit.pathIndex === link.blankVisitPathIndex,
+                );
+                const to = placed.find(
+                  (item) => item.visit.pathIndex === link.returnVisitPathIndex,
+                );
+                if (from === undefined || to === undefined) return null;
+                const { d } = arcPath(from.x, from.y - 7, to.x, to.y - 7, lay.arcCeiling);
+                return (
+                  <path
+                    key={`link-${link.questionNumber}`}
+                    d={d}
+                    style={{
+                      stroke: 'var(--accent)',
+                      strokeWidth: 1.2,
+                      strokeDasharray: '3 3',
+                      opacity: 0.75,
+                    }}
+                  />
+                );
+              })}
+            </g>
+          )}
+
+          {/* Changepoint layer, on the path edges */}
+          {layers.changepoints && (
+            <g>
+              {edges.map((edge) => {
+                if (edge === null || edge.changepoint === undefined) return null;
+                const [ax, ay] = edge.geometry.apex;
+                const negative = edge.changepoint.isNegative;
+                return (
+                  <g key={`cp-${edge.index}`} opacity={dimOthers && !edge.isReturnEdge ? 0.35 : 1}>
+                    {negative ? (
+                      <path
+                        d={markPath('diamond', ax, ay, 9.5)}
+                        style={{
+                          fill: 'var(--text-primary)',
+                          stroke: 'var(--surface-1)',
+                          strokeWidth: 2.4,
+                          paintOrder: 'stroke',
+                        }}
+                      >
+                        <title>
+                          {`Negative changepoint ${edge.changepoint.fromState} → ${edge.changepoint.toState} at Q${edge.changepoint.questionNumber}`}
+                        </title>
+                      </path>
+                    ) : (
+                      <circle
+                        cx={ax}
+                        cy={ay}
+                        r={2.6}
+                        style={{
+                          fill: 'var(--surface-1)',
+                          stroke: 'var(--text-muted)',
+                          strokeWidth: 1.4,
+                        }}
+                      >
+                        <title>
+                          {`Changepoint ${edge.changepoint.fromState} → ${edge.changepoint.toState} at Q${edge.changepoint.questionNumber}`}
+                        </title>
+                      </circle>
+                    )}
+                  </g>
+                );
+              })}
+            </g>
+          )}
+
+          {/* Visit marks */}
           <g>
-            {edges.map((edge) => {
-              if (edge === null || edge.changepoint === undefined) return null;
-              const [ax, ay] = edge.geometry.apex;
-              const negative = edge.changepoint.isNegative;
+            {placed.map((item) => {
+              const shape = STATE_SHAPES[item.visit.state];
+              const hollow = isHollow(shape);
+              const dim = dimOthers && !item.visit.isReturn && !isPairedBlank(item.visit, links);
+              const active = hovered?.visit.pathIndex === item.visit.pathIndex;
               return (
-                <g key={`cp-${edge.index}`} opacity={dimOthers && !edge.isReturnEdge ? 0.35 : 1}>
-                  {negative ? (
-                    <path
-                      d={markPath('diamond', ax, ay, 9.5)}
-                      style={{
-                        fill: 'var(--text-primary)',
-                        stroke: 'var(--surface-1)',
-                        strokeWidth: 2.4,
-                        paintOrder: 'stroke',
-                      }}
-                    >
-                      <title>
-                        {`Negative changepoint ${edge.changepoint.fromState} → ${edge.changepoint.toState} at Q${edge.changepoint.questionNumber}`}
-                      </title>
-                    </path>
-                  ) : (
-                    <circle
-                      cx={ax}
-                      cy={ay}
-                      r={2.6}
-                      style={{
-                        fill: 'var(--surface-1)',
-                        stroke: 'var(--text-muted)',
-                        strokeWidth: 1.4,
-                      }}
-                    >
-                      <title>
-                        {`Changepoint ${edge.changepoint.fromState} → ${edge.changepoint.toState} at Q${edge.changepoint.questionNumber}`}
-                      </title>
-                    </circle>
+                <g
+                  key={`mark-${item.visit.pathIndex}`}
+                  opacity={dim ? 0.3 : 1}
+                  onMouseEnter={() => setHovered(item)}
+                  onMouseLeave={() => setHovered(null)}
+                >
+                  {active && (
+                    <circle cx={item.x} cy={item.y} r={9.5} style={{ fill: 'var(--surface-2)' }} />
                   )}
+                  <path
+                    d={markPath(shape, item.x, item.y, MARK_SIZE)}
+                    style={{
+                      fill: hollow ? 'var(--surface-1)' : stateColor(item.visit.state),
+                      stroke: stateColor(item.visit.state),
+                      strokeWidth: hollow ? 2 : 1.4,
+                      paintOrder: 'stroke',
+                    }}
+                  />
+                  {!twoLane && item.visit.isReturn && (
+                    <line
+                      x1={item.x - 4}
+                      x2={item.x + 4}
+                      y1={item.y + 9}
+                      y2={item.y + 9}
+                      style={{ stroke: 'var(--accent)', strokeWidth: 1.6 }}
+                    />
+                  )}
+                  <circle className="hit" cx={item.x} cy={item.y} r={Math.max(9, columnWidth / 2)}>
+                    <title>{describe(item.visit, topics, questions)}</title>
+                  </circle>
                 </g>
               );
             })}
           </g>
-        )}
 
-        {/* Visit marks */}
-        <g>
-          {placed.map((item) => {
-            const shape = STATE_SHAPES[item.visit.state];
-            const hollow = isHollow(shape);
-            const dim = dimOthers && !item.visit.isReturn && !isPairedBlank(item.visit, links);
-            const active = hovered?.visit.pathIndex === item.visit.pathIndex;
-            return (
-              <g
-                key={`mark-${item.visit.pathIndex}`}
-                opacity={dim ? 0.3 : 1}
-                onMouseEnter={() => setHovered(item)}
-                onMouseLeave={() => setHovered(null)}
-              >
-                {active && (
-                  <circle cx={item.x} cy={item.y} r={9.5} style={{ fill: 'var(--surface-2)' }} />
-                )}
-                <path
-                  d={markPath(shape, item.x, item.y, MARK_SIZE)}
-                  style={{
-                    fill: hollow ? 'var(--surface-1)' : stateColor(item.visit.state),
-                    stroke: stateColor(item.visit.state),
-                    strokeWidth: hollow ? 2 : 1.4,
-                    paintOrder: 'stroke',
-                  }}
-                />
-                {!twoLane && item.visit.isReturn && (
-                  <line
-                    x1={item.x - 4}
-                    x2={item.x + 4}
-                    y1={item.y + 9}
-                    y2={item.y + 9}
-                    style={{ stroke: 'var(--accent)', strokeWidth: 1.6 }}
-                  />
-                )}
-                <circle className="hit" cx={item.x} cy={item.y} r={Math.max(9, columnWidth / 2)}>
-                  <title>{describe(item.visit, topics, questions)}</title>
-                </circle>
-              </g>
-            );
-          })}
-        </g>
-
-        {/* Axis */}
-        <g aria-hidden="true">
-          <line
-            x1={MARGIN.left}
-            x2={VIEW_WIDTH - MARGIN.right}
-            y1={lay.axisY}
-            y2={lay.axisY}
-            style={{ stroke: 'var(--axis)', strokeWidth: 1 }}
-          />
-          {viewMode === 'by-question'
-            ? questions.map((question) => (
-                <text
-                  key={`tick-${question.questionNumber}`}
-                  x={MARGIN.left + (question.questionNumber - 0.5) * columnWidth}
-                  y={lay.labelY}
-                  textAnchor="middle"
-                  className="axis-label"
-                >
-                  {question.questionNumber}
-                </text>
-              ))
-            : placed
-                .filter((_item, index) => index % 5 === 0)
-                .map((item) => (
+          {/* Axis */}
+          <g aria-hidden="true">
+            <line
+              x1={MARGIN.left}
+              x2={VIEW_WIDTH - MARGIN.right}
+              y1={lay.axisY}
+              y2={lay.axisY}
+              style={{ stroke: 'var(--axis)', strokeWidth: 1 }}
+            />
+            {viewMode === 'by-question'
+              ? questions.map((question) => (
                   <text
-                    key={`vtick-${item.visit.pathIndex}`}
-                    x={item.x}
+                    key={`tick-${question.questionNumber}`}
+                    x={MARGIN.left + (question.questionNumber - 0.5) * columnWidth}
                     y={lay.labelY}
                     textAnchor="middle"
                     className="axis-label"
                   >
-                    {item.visit.pathIndex + 1}
+                    {question.questionNumber}
                   </text>
-                ))}
-          <text
-            x={MARGIN.left + (VIEW_WIDTH - MARGIN.left - MARGIN.right) / 2}
-            y={lay.height - 8}
-            textAnchor="middle"
-            className="axis-title"
-          >
-            {viewMode === 'by-question'
-              ? 'Question number — a return travels back along this axis'
-              : 'Visit order — the sequence the Markov analysis walks'}
-          </text>
-        </g>
-      </svg>
+                ))
+              : placed
+                  .filter((_item, index) => index % 5 === 0)
+                  .map((item) => (
+                    <text
+                      key={`vtick-${item.visit.pathIndex}`}
+                      x={item.x}
+                      y={lay.labelY}
+                      textAnchor="middle"
+                      className="axis-label"
+                    >
+                      {item.visit.pathIndex + 1}
+                    </text>
+                  ))}
+            <text
+              x={MARGIN.left + (VIEW_WIDTH - MARGIN.left - MARGIN.right) / 2}
+              y={lay.height - 8}
+              textAnchor="middle"
+              className="axis-title"
+            >
+              {viewMode === 'by-question'
+                ? 'Question number — a return travels back along this axis'
+                : 'Visit order — the sequence the Markov analysis walks'}
+            </text>
+          </g>
+        </svg>
 
-      {hovered !== null && (
-        <VisitTooltip placed={hovered} topics={topics} scale={scale} width={wrapWidth} />
-      )}
+        {hovered !== null && (
+          <VisitTooltip placed={hovered} topics={topics} scale={scale} width={wrapWidth} />
+        )}
+      </div>
     </div>
   );
 }
@@ -593,7 +620,11 @@ export function TimelineTable({
                   <span className="row-name">
                     <span
                       className="legend-swatch"
-                      style={{ background: stateColor(visit.state), width: 10, height: 10 }}
+                      style={{
+                        background: stateColor(visit.state),
+                        width: 10,
+                        height: 10,
+                      }}
                     />
                     {visit.state}
                   </span>

@@ -15,7 +15,11 @@ const LOG_RANGE = 3;
 
 export function TransitionHeatmap({ matrix }: { matrix: TransitionMatrix }): ReactNode {
   if (matrix.total === 0) {
-    return <p className="empty-note">No transitions yet — every attempt has at least two visits once the test runs.</p>;
+    return (
+      <p className="empty-note">
+        No transitions yet — every attempt has at least two visits once the test runs.
+      </p>
+    );
   }
 
   return (
@@ -49,8 +53,10 @@ export function TransitionHeatmap({ matrix }: { matrix: TransitionMatrix }): Rea
                       key={to}
                       style={{
                         textAlign: 'center',
-                        background: lift === null ? 'var(--surface-2)' : divergingColor(signal, LOG_RANGE),
-                        color: lift === null ? 'var(--text-muted)' : divergingInk(signal, LOG_RANGE),
+                        background:
+                          lift === null ? 'var(--surface-2)' : divergingColor(signal, LOG_RANGE),
+                        color:
+                          lift === null ? 'var(--text-muted)' : divergingInk(signal, LOG_RANGE),
                         fontWeight: lift !== null && lift >= 2 ? 600 : 400,
                         borderBottom: '2px solid var(--surface-1)',
                         borderRight: '2px solid var(--surface-1)',

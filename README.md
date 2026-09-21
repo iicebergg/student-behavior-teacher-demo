@@ -28,7 +28,7 @@ to it later, and that return behaviour feeds the transition analysis directly:
 - The Markov sequence runs over each student's **temporal visit path**, not over question order.
 - A skip is a genuine BF or BS in the chain.
 - A later return is a **separate visit** that emits its own state and its own transition.
-- The pair *(blank state → return state)* is also kept as a first-class edge (a `ReturnLink`), on
+- The pair _(blank state → return state)_ is also kept as a first-class edge (a `ReturnLink`), on
   top of the two visits' own path transitions, because the two visits are non-adjacent in the path.
 
 One consequence is deliberate and is called out in the UI: **the transition matrix diverges from
@@ -42,14 +42,14 @@ npm install
 npm run dev        # http://localhost:5173
 ```
 
-| script | what it does |
-| --- | --- |
-| `npm run dev` | dev server |
-| `npm run build` | typecheck and build to `dist/` |
-| `npm run preview` | serve the built output |
-| `npm test` | unit tests (encoding port, generator invariants, analysis, baked-in signal) |
-| `npm run signal` | print the headline numbers for the current defaults |
-| `npm run sweep` | print those numbers across the whole range of every knob |
+| script            | what it does                                                                |
+| ----------------- | --------------------------------------------------------------------------- |
+| `npm run dev`     | dev server                                                                  |
+| `npm run build`   | typecheck and build to `dist/`                                              |
+| `npm run preview` | serve the built output                                                      |
+| `npm test`        | unit tests (encoding port, generator invariants, analysis, baked-in signal) |
+| `npm run signal`  | print the headline numbers for the current defaults                         |
+| `npm run sweep`   | print those numbers across the whole range of every knob                    |
 
 No backend, no network calls. Vite + React + TypeScript in strict mode, with no `any`. The
 timeline is hand-built SVG; so is every other chart, for one consistent set of marks.
@@ -59,20 +59,20 @@ timeline is hand-built SVG; so is every other chart, for one consistent set of m
 A state is assigned **per visit**, not per question. A blank visit and its later return each get
 their own.
 
-| state | meaning | how it is reached |
-| --- | --- | --- |
-| **C** | correct, engaged | answered, took a normal amount of time, got it right |
-| **W** | wrong, engaged | answered, took a normal amount of time, got it wrong |
-| **V** | heavy revision | multiple choice, 3+ answer changes, not rapid — visible uncertainty |
-| **R** | rapid | at or under the question's rapid threshold — too fast to have read it |
-| **BF** | blank fast | multiple choice, 0 changes, at or under the threshold — a skip |
-| **BS** | blank slow | multiple choice, 0 changes, over the threshold — worked it, then gave up |
+| state  | meaning          | how it is reached                                                        |
+| ------ | ---------------- | ------------------------------------------------------------------------ |
+| **C**  | correct, engaged | answered, took a normal amount of time, got it right                     |
+| **W**  | wrong, engaged   | answered, took a normal amount of time, got it wrong                     |
+| **V**  | heavy revision   | multiple choice, 3+ answer changes, not rapid — visible uncertainty      |
+| **R**  | rapid            | at or under the question's rapid threshold — too fast to have read it    |
+| **BF** | blank fast       | multiple choice, 0 changes, at or under the threshold — a skip           |
+| **BS** | blank slow       | multiple choice, 0 changes, over the threshold — worked it, then gave up |
 
 The branches are evaluated in that order in `encode_state`, and the order matters:
 
 1. **Blank is checked before rapid.** A blank can also be slow — a student can sit with a question
    for two minutes and never pick anything — so the blank branch runs first, and the threshold
-   comparison happens *inside* it to split BF from BS.
+   comparison happens _inside_ it to split BF from BS.
 2. **Rapid outranks revision.** A fast response with many changes is rapid, not revision.
 3. **V is multiple-choice only**, like BF and BS: away from MC, `answerChanges` counts something
    other than choice-switching. Every question here is MC, but the guards are kept so the port
@@ -99,7 +99,7 @@ are integer seconds; at the defaults the thresholds land between about 8 and 10 
   visits in the chain, and the timeline draws the path in temporal order so a return produces a
   connector that loops back along the question axis.
 - **The transition matrix diverges from Fig. 3 by design**, as above. Lift also scales inversely
-  with how common a state is, so the *absolute* blank-to-blank lift moves as you move the blank-rate
+  with how common a state is, so the _absolute_ blank-to-blank lift moves as you move the blank-rate
   knob: the rarer blanks get, the higher it climbs. The paper reports 20×+ on real data where blanks
   are rarer than they are here by default.
 - **The generator bakes in the paper's findings** so the graphs show signal rather than noise:
@@ -112,7 +112,7 @@ are integer seconds; at the defaults the thresholds land between about 8 and 10 
   is roughly `persistence ÷ share`, so persistence is set from a target lift, which keeps the
   headline numbers stable as the rate knobs move.
 - **A changepoint is any transition to a different state** between adjacent visits in the path. It
-  is *negative* when mean correctness over the k answering visits after it is lower than over the k
+  is _negative_ when mean correctness over the k answering visits after it is lower than over the k
   before. Both windows clamp at the ends of the path.
 - **Generation and analysis are separate passes.** Moving the changepoint window or the
   blank-handling rule re-measures the same class without reshuffling it.
@@ -121,39 +121,39 @@ are integer seconds; at the defaults the thresholds land between about 8 and 10 
 
 ### Class
 
-| knob | default | what it does |
-| --- | --- | --- |
+| knob        | default       | what it does                                                |
+| ----------- | ------------- | ----------------------------------------------------------- |
 | Random seed | `solace-2026` | Reproduces a class exactly. **Regenerate** picks a new one. |
-| Students | 48 | Class size, 4–200. |
+| Students    | 48            | Class size, 4–200.                                          |
 
 ### Behaviour
 
-| knob | default | what it does |
-| --- | --- | --- |
-| Global blank rate | 3% | Baseline chance of going blank on the forward pass. Difficulty, fatigue, topic triggers and blank stickiness all push it up, so the realised share is higher — the panel shows the realised number next to the knob. |
-| Rapid-response rate | 7% | Baseline chance of answering at or under the rapid threshold. |
-| Revision propensity | 12% | Chance an answering visit turns into 3+ answer changes, which encodes as V. |
+| knob                | default | what it does                                                                                                                                                                                                         |
+| ------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Global blank rate   | 3%      | Baseline chance of going blank on the forward pass. Difficulty, fatigue, topic triggers and blank stickiness all push it up, so the realised share is higher — the panel shows the realised number next to the knob. |
+| Rapid-response rate | 7%      | Baseline chance of answering at or under the rapid threshold.                                                                                                                                                        |
+| Revision propensity | 12%     | Chance an answering visit turns into 3+ answer changes, which encodes as V.                                                                                                                                          |
 
 ### Returns
 
-| knob | default | what it does |
-| --- | --- | --- |
-| Blank, then return | 55% | Chance a skipped question is answered on a later visit. At 0 there are no returns at all and the chain is forward-only, like the paper. |
-| Return timing | End of test | One sweep back after the forward pass, or coming back a few questions later during it. |
+| knob               | default     | what it does                                                                                                                            |
+| ------------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Blank, then return | 55%         | Chance a skipped question is answered on a later visit. At 0 there are no returns at all and the chain is forward-only, like the paper. |
+| Return timing      | End of test | One sweep back after the forward pass, or coming back a few questions later during it.                                                  |
 
 ### Topics (per topic, 5 of them)
 
-| knob | default | what it does |
-| --- | --- | --- |
-| Label | *editable* | The name a teacher sees, everywhere. |
-| Difficulty | 0.22–0.72 | How much the topic drags accuracy down, and how often it gets skipped. |
+| knob               | default           | what it does                                                                                                                                                             |
+| ------------------ | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Label              | _editable_        | The name a teacher sees, everywhere.                                                                                                                                     |
+| Difficulty         | 0.22–0.72         | How much the topic drags accuracy down, and how often it gets skipped.                                                                                                   |
 | Difficulty trigger | on for two topics | Meeting the topic raises the chance of a negative changepoint on that question and the few visits after it — the coordinate-plane and 2-D-geometry effects in the paper. |
 
 ### Changepoint analysis
 
-| knob | default | what it does |
-| --- | --- | --- |
-| Accuracy window k | 3 | Answering visits compared either side of a changepoint. |
+| knob                  | default | what it does                                             |
+| --------------------- | ------- | -------------------------------------------------------- |
+| Accuracy window k     | 3       | Answering visits compared either side of a changepoint.  |
 | Blanks in that window | Exclude | Drop blanks from the window, or count them as incorrect. |
 
 Both of these re-measure the same class; neither reshuffles it.
@@ -164,7 +164,7 @@ Both of these re-measure the same class; neither reshuffles it.
 is a marker at its question; a question that was skipped and later answered stacks two markers, the
 blank on the lower lane and the return above. The path is drawn in temporal order, so a return
 loops back along the axis. Toggles: **topic layer**, **changepoint layer**, **emphasise returns**,
-plus a view-mode switch between *by question* (with the back-arcs) and *by visit order* (the same
+plus a view-mode switch between _by question_ (with the back-arcs) and _by visit order_ (the same
 path straightened left to right, where the return links become dashed arcs). Hovering a marker
 gives the question, topic, state, duration, answer changes, whether it was a return, correctness and
 the threshold. A **Table** toggle shows the same path as numbers.
@@ -196,9 +196,9 @@ src/state/           settings (with URL and localStorage persistence) and app st
 Two categorical scales, both checked with a palette validator on the strictest (all-pairs)
 comparison, in light and dark, against the surfaces the app actually renders on:
 
-| scale | light | dark |
-| --- | --- | --- |
-| six states | worst CVD ΔE 8.1, worst normal-vision ΔE 16.9, all ≥ 3:1 contrast | 8.0 / 16.5 / ≥ 3:1 |
+| scale       | light                                                             | dark               |
+| ----------- | ----------------------------------------------------------------- | ------------------ |
+| six states  | worst CVD ΔE 8.1, worst normal-vision ΔE 16.9, all ≥ 3:1 contrast | 8.0 / 16.5 / ≥ 3:1 |
 | five topics | worst CVD ΔE 8.0, worst normal-vision ΔE 16.2, all ≥ 3:1 contrast | 8.0 / 16.0 / ≥ 3:1 |
 
 Each state keeps one hue across both themes; only the step changes. Colour is never the only

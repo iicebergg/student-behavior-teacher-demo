@@ -52,229 +52,266 @@ export function AggregateTimeline({
 
   const rateSeries = useMemo(
     () => [
-      { key: 'blankFirstShare' as const, label: 'left blank on the first pass', color: 'var(--state-bf)' },
-      { key: 'changepointShare' as const, label: 'changepoints per student', color: 'var(--text-secondary)' },
-      { key: 'negativeChangepointShare' as const, label: 'negative changepoints per student', color: 'var(--critical)' },
+      {
+        key: 'blankFirstShare' as const,
+        label: 'left it blank on the first pass',
+        color: 'var(--state-bf)',
+      },
+      {
+        key: 'changepointShare' as const,
+        label: 'changed behaviour here',
+        color: 'var(--text-secondary)',
+      },
+      {
+        key: 'negativeChangepointShare' as const,
+        label: 'changed behaviour for the worse',
+        color: 'var(--critical)',
+      },
     ],
     [],
   );
 
+  /** Every rate series is a share of the class, so they share one 0..1 axis. */
   const rateMax = useMemo(() => {
     let max = 0.2;
     for (const row of rows) {
       max = Math.max(max, row.blankFirstShare, row.changepointShare, row.negativeChangepointShare);
     }
-    return Math.ceil(max * 10) / 10;
+    return Math.min(1, Math.ceil(max * 10) / 10);
   }, [rows]);
 
   return (
-    <div className="chart-wrap" ref={wrapRef}>
-      <svg
-        viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
-        role="img"
-        aria-label={
-          metric === 'state-mix'
-            ? 'Distribution of behavioural states per question across the class.'
-            : 'Blank rate and changepoint incidence per question across the class.'
-        }
-      >
-        {/* Gridlines */}
-        <g aria-hidden="true">
-          {[0, 0.25, 0.5, 0.75, 1].map((fraction) => {
-            const y = MARGIN.top + PLOT_H * (1 - fraction);
-            return (
-              <g key={fraction}>
-                <line
-                  x1={MARGIN.left}
-                  x2={VIEW_WIDTH - MARGIN.right}
-                  y1={y}
-                  y2={y}
-                  style={{ stroke: 'var(--gridline)', strokeWidth: 1 }}
-                />
-                <text x={MARGIN.left - 6} y={y + 3} textAnchor="end" className="axis-label">
-                  {metric === 'state-mix'
-                    ? `${Math.round(fraction * 100)}%`
-                    : `${Math.round(fraction * rateMax * 100)}%`}
-                </text>
-              </g>
-            );
-          })}
-        </g>
-
-        {/* Topic layer */}
-        {showTopics && (
+    <div className="chart-scroll">
+      <div className="chart-wrap" ref={wrapRef}>
+        <svg
+          viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
+          role="img"
+          aria-label={
+            metric === 'state-mix'
+              ? 'Distribution of behavioural states per question across the class.'
+              : 'Blank rate and changepoint incidence per question across the class.'
+          }
+        >
+          {/* Gridlines */}
           <g aria-hidden="true">
-            {questions.map((question, index) => (
-              <g key={`topic-${question.questionNumber}`}>
-                <rect
-                  x={MARGIN.left + index * columnWidth}
-                  y={MARGIN.top}
-                  width={columnWidth}
-                  height={PLOT_H}
-                  style={{ fill: topicColor(question.topicId), opacity: 0.07 }}
-                />
-                <rect
-                  x={MARGIN.left + index * columnWidth + 0.5}
-                  y={STRIP_Y}
-                  width={Math.max(0.5, columnWidth - 1)}
-                  height={STRIP_H}
-                  rx={1.5}
-                  style={{ fill: topicColor(question.topicId), opacity: 0.85 }}
-                />
-              </g>
-            ))}
-          </g>
-        )}
-
-        {/* Stacked state mix, or the rate lines */}
-        {metric === 'state-mix' ? (
-          <g>
-            {rows.map((row, index) => {
-              const x = xFor(index) - barWidth / 2;
-              let offset = 0;
-              const segments = STATES.map((state) => {
-                const share = row.visits > 0 ? (row.stateCounts.get(state) ?? 0) / row.visits : 0;
-                const height = share * PLOT_H;
-                const y = MARGIN.top + PLOT_H - offset - height;
-                offset += height;
-                return { state, share, height, y };
-              }).filter((segment) => segment.height > 0);
-
+            {[0, 0.25, 0.5, 0.75, 1].map((fraction) => {
+              const y = MARGIN.top + PLOT_H * (1 - fraction);
               return (
+                <g key={fraction}>
+                  <line
+                    x1={MARGIN.left}
+                    x2={VIEW_WIDTH - MARGIN.right}
+                    y1={y}
+                    y2={y}
+                    style={{ stroke: 'var(--gridline)', strokeWidth: 1 }}
+                  />
+                  <text x={MARGIN.left - 6} y={y + 3} textAnchor="end" className="axis-label">
+                    {metric === 'state-mix'
+                      ? `${Math.round(fraction * 100)}%`
+                      : `${Math.round(fraction * rateMax * 100)}%`}
+                  </text>
+                </g>
+              );
+            })}
+          </g>
+
+          {/* Topic layer */}
+          {showTopics && (
+            <g aria-hidden="true">
+              {questions.map((question, index) => (
+                <g key={`topic-${question.questionNumber}`}>
+                  <rect
+                    x={MARGIN.left + index * columnWidth}
+                    y={MARGIN.top}
+                    width={columnWidth}
+                    height={PLOT_H}
+                    style={{
+                      fill: topicColor(question.topicId),
+                      opacity: 0.07,
+                    }}
+                  />
+                  <rect
+                    x={MARGIN.left + index * columnWidth + 0.5}
+                    y={STRIP_Y}
+                    width={Math.max(0.5, columnWidth - 1)}
+                    height={STRIP_H}
+                    rx={1.5}
+                    style={{
+                      fill: topicColor(question.topicId),
+                      opacity: 0.85,
+                    }}
+                  />
+                </g>
+              ))}
+            </g>
+          )}
+
+          {/* Stacked state mix, or the rate lines */}
+          {metric === 'state-mix' ? (
+            <g>
+              {rows.map((row, index) => {
+                const x = xFor(index) - barWidth / 2;
+                let offset = 0;
+                const segments = STATES.map((state) => {
+                  const share = row.visits > 0 ? (row.stateCounts.get(state) ?? 0) / row.visits : 0;
+                  const height = share * PLOT_H;
+                  const y = MARGIN.top + PLOT_H - offset - height;
+                  offset += height;
+                  return { state, share, height, y };
+                }).filter((segment) => segment.height > 0);
+
+                return (
+                  <g
+                    key={row.questionNumber}
+                    onMouseEnter={() => setHovered(row)}
+                    onMouseLeave={() => setHovered(null)}
+                  >
+                    {segments.map((segment) => (
+                      <rect
+                        key={segment.state}
+                        x={x}
+                        y={segment.y}
+                        width={barWidth}
+                        height={Math.max(0.6, segment.height - SEGMENT_GAP)}
+                        rx={1}
+                        style={{ fill: stateColor(segment.state) }}
+                      />
+                    ))}
+                    <rect
+                      className="hit"
+                      x={x - 1}
+                      y={MARGIN.top}
+                      width={barWidth + 2}
+                      height={PLOT_H}
+                    >
+                      <title>{summaryFor(row)}</title>
+                    </rect>
+                  </g>
+                );
+              })}
+            </g>
+          ) : (
+            <g>
+              {rateSeries.map((series) => (
+                <path
+                  key={series.key}
+                  d={rows
+                    .map((row, index) => {
+                      const y = MARGIN.top + PLOT_H * (1 - row[series.key] / rateMax);
+                      return `${index === 0 ? 'M' : 'L'} ${xFor(index)} ${y}`;
+                    })
+                    .join(' ')}
+                  style={{
+                    fill: 'none',
+                    stroke: series.color,
+                    strokeWidth: 2,
+                    strokeLinejoin: 'round',
+                  }}
+                />
+              ))}
+              {rows.map((row, index) => (
                 <g
                   key={row.questionNumber}
                   onMouseEnter={() => setHovered(row)}
                   onMouseLeave={() => setHovered(null)}
                 >
-                  {segments.map((segment) => (
-                    <rect
-                      key={segment.state}
-                      x={x}
-                      y={segment.y}
-                      width={barWidth}
-                      height={Math.max(0.6, segment.height - SEGMENT_GAP)}
-                      rx={1}
-                      style={{ fill: stateColor(segment.state) }}
-                    />
-                  ))}
                   <rect
                     className="hit"
-                    x={x - 1}
+                    x={xFor(index) - columnWidth / 2}
                     y={MARGIN.top}
-                    width={barWidth + 2}
+                    width={columnWidth}
                     height={PLOT_H}
                   >
                     <title>{summaryFor(row)}</title>
                   </rect>
                 </g>
-              );
-            })}
-          </g>
-        ) : (
-          <g>
-            {rateSeries.map((series) => (
-              <path
-                key={series.key}
-                d={rows
-                  .map((row, index) => {
-                    const y = MARGIN.top + PLOT_H * (1 - row[series.key] / rateMax);
-                    return `${index === 0 ? 'M' : 'L'} ${xFor(index)} ${y}`;
-                  })
-                  .join(' ')}
-                style={{ fill: 'none', stroke: series.color, strokeWidth: 2, strokeLinejoin: 'round' }}
-              />
-            ))}
-            {rows.map((row, index) => (
-              <g
-                key={row.questionNumber}
-                onMouseEnter={() => setHovered(row)}
-                onMouseLeave={() => setHovered(null)}
-              >
-                <rect
-                  className="hit"
-                  x={xFor(index) - columnWidth / 2}
-                  y={MARGIN.top}
-                  width={columnWidth}
-                  height={PLOT_H}
-                >
-                  <title>{summaryFor(row)}</title>
-                </rect>
-              </g>
-            ))}
-          </g>
-        )}
+              ))}
+            </g>
+          )}
 
-        {/* Changepoint layer: incidence per question, on top of whichever metric is showing */}
-        {showChangepoints && metric === 'state-mix' && (
+          {/* Changepoint layer: incidence per question, on top of whichever metric is showing */}
+          {showChangepoints && metric === 'state-mix' && (
+            <g aria-hidden="true">
+              {rows.map((row, index) => {
+                const height =
+                  Math.min(1, row.negativeChangepointShare / Math.max(0.05, rateMax)) * 26;
+                return (
+                  <rect
+                    key={`cp-${row.questionNumber}`}
+                    x={xFor(index) - 2}
+                    y={MARGIN.top - 4 - height}
+                    width={4}
+                    height={height}
+                    rx={1}
+                    style={{ fill: 'var(--critical)' }}
+                  />
+                );
+              })}
+              <text x={MARGIN.left} y={MARGIN.top - 36} className="axis-label">
+                share of the class whose behaviour turned down here ▲
+              </text>
+            </g>
+          )}
+
+          {/* Axis */}
           <g aria-hidden="true">
-            {rows.map((row, index) => {
-              const height = Math.min(1, row.negativeChangepointShare / Math.max(0.05, rateMax)) * 26;
-              return (
-                <rect
-                  key={`cp-${row.questionNumber}`}
-                  x={xFor(index) - 2}
-                  y={MARGIN.top - 4 - height}
-                  width={4}
-                  height={height}
-                  rx={1}
-                  style={{ fill: 'var(--critical)' }}
-                />
-              );
-            })}
-            <text x={MARGIN.left} y={MARGIN.top - 36} className="axis-label">
-              negative changepoints per student ▲
+            <line
+              x1={MARGIN.left}
+              x2={VIEW_WIDTH - MARGIN.right}
+              y1={AXIS_Y}
+              y2={AXIS_Y}
+              style={{ stroke: 'var(--axis)', strokeWidth: 1 }}
+            />
+            {questions.map((question, index) => (
+              <text
+                key={question.questionNumber}
+                x={xFor(index)}
+                y={LABEL_Y}
+                textAnchor="middle"
+                className="axis-label"
+              >
+                {question.questionNumber}
+              </text>
+            ))}
+            <text
+              x={MARGIN.left + (VIEW_WIDTH - MARGIN.left - MARGIN.right) / 2}
+              y={VIEW_HEIGHT - 8}
+              textAnchor="middle"
+              className="axis-title"
+            >
+              Question number
             </text>
           </g>
+        </svg>
+
+        {metric === 'rates' && (
+          <div className="legend" style={{ marginTop: 8 }}>
+            {rateSeries.map((series) => (
+              <span className="legend-item" key={series.key}>
+                <span
+                  className="legend-swatch"
+                  style={{
+                    background: series.color,
+                    height: 3,
+                    borderRadius: 2,
+                  }}
+                />
+                <span>{series.label}</span>
+              </span>
+            ))}
+          </div>
         )}
 
-        {/* Axis */}
-        <g aria-hidden="true">
-          <line
-            x1={MARGIN.left}
-            x2={VIEW_WIDTH - MARGIN.right}
-            y1={AXIS_Y}
-            y2={AXIS_Y}
-            style={{ stroke: 'var(--axis)', strokeWidth: 1 }}
+        {hovered !== null && (
+          <AggregateTooltip
+            row={hovered}
+            topics={topics}
+            scale={scale}
+            width={wrapWidth}
+            columnWidth={columnWidth}
           />
-          {questions.map((question, index) => (
-            <text
-              key={question.questionNumber}
-              x={xFor(index)}
-              y={LABEL_Y}
-              textAnchor="middle"
-              className="axis-label"
-            >
-              {question.questionNumber}
-            </text>
-          ))}
-          <text
-            x={MARGIN.left + (VIEW_WIDTH - MARGIN.left - MARGIN.right) / 2}
-            y={VIEW_HEIGHT - 8}
-            textAnchor="middle"
-            className="axis-title"
-          >
-            Question number
-          </text>
-        </g>
-      </svg>
-
-      {metric === 'rates' && (
-        <div className="legend" style={{ marginTop: 8 }}>
-          {rateSeries.map((series) => (
-            <span className="legend-item" key={series.key}>
-              <span
-                className="legend-swatch"
-                style={{ background: series.color, height: 3, borderRadius: 2 }}
-              />
-              <span>{series.label}</span>
-            </span>
-          ))}
-        </div>
-      )}
-
-      {hovered !== null && (
-        <AggregateTooltip row={hovered} topics={topics} scale={scale} width={wrapWidth} columnWidth={columnWidth} />
-      )}
+        )}
+      </div>
     </div>
   );
 }
@@ -313,10 +350,7 @@ function AggregateTooltip({
     .slice(0, 3);
 
   return (
-    <div
-      className="tooltip"
-      style={{ left: Math.max(0, flip ? left - 250 : left + 14), top: 10 }}
-    >
+    <div className="tooltip" style={{ left: Math.max(0, flip ? left - 250 : left + 14), top: 10 }}>
       <div className="tooltip-title">
         Q{row.questionNumber} · {topic?.label ?? 'Topic'}
       </div>
@@ -327,10 +361,10 @@ function AggregateTooltip({
         <dd>{percent(row.blankFirstShare, 0)}</dd>
         <dt>Came back</dt>
         <dd>{row.blankFirstShare > 0 ? percent(row.returnShare, 0) : '—'}</dd>
-        <dt>Changepoints</dt>
-        <dd>{row.changepointShare.toFixed(2)} / student</dd>
-        <dt>Negative</dt>
-        <dd>{row.negativeChangepointShare.toFixed(2)} / student</dd>
+        <dt>Changed behaviour</dt>
+        <dd>{percent(row.changepointShare, 0)} of the class</dd>
+        <dt>…for the worse</dt>
+        <dd>{percent(row.negativeChangepointShare, 0)} of the class</dd>
         <dt>Finally correct</dt>
         <dd>{percent(row.accuracy, 0)}</dd>
         <dt>Median visit</dt>

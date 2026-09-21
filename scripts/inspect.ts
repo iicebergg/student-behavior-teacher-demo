@@ -9,12 +9,16 @@ const dataset = generateDataset(settings);
 const a = analyze(dataset, settings);
 
 const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
-console.log(`students=${dataset.students.length} visits=${a.totalVisits} edges=${a.edges.length} meanScore=${pct(a.meanScore)}`);
+console.log(
+  `students=${dataset.students.length} visits=${a.totalVisits} edges=${a.edges.length} meanScore=${pct(a.meanScore)}`,
+);
 console.log('state shares:', STATES.map((s) => `${s}=${pct(a.stateShares.get(s) ?? 0)}`).join(' '));
 
 const thr = [...dataset.rapidThresholds.values()];
 const med = [...dataset.medianVisitSeconds.values()];
-console.log(`threshold min/max=${Math.min(...thr).toFixed(1)}/${Math.max(...thr).toFixed(1)}  median-visit min/max=${Math.min(...med)}/${Math.max(...med)}`);
+console.log(
+  `threshold min/max=${Math.min(...thr).toFixed(1)}/${Math.max(...thr).toFixed(1)}  median-visit min/max=${Math.min(...med)}/${Math.max(...med)}`,
+);
 
 console.log('\nlift matrix (rows = current, cols = next):');
 console.log(['     ', ...STATES.map((s) => s.padStart(6))].join(''));
@@ -29,11 +33,20 @@ for (const from of STATES) {
 console.log('\nchangepoints:', JSON.stringify(a.changepointSummary, null, 0));
 console.log('topic lifts:');
 for (const t of a.topicLifts) {
-  console.log(`  ${t.label.padEnd(24)} trigger=${t.isTrigger ? 'Y' : 'n'} rate=${pct(t.rate)} lift=${t.lift?.toFixed(2) ?? '—'} n=${t.negativeChangepoints}/${t.eligibleVisits}`);
+  console.log(
+    `  ${t.label.padEnd(24)} trigger=${t.isTrigger ? 'Y' : 'n'} rate=${pct(t.rate)} lift=${t.lift?.toFixed(2) ?? '—'} n=${t.negativeChangepoints}/${t.eligibleVisits}`,
+  );
 }
-console.log('\nreturns:', `blankFirst=${a.returns.blankFirstQuestions} returned=${a.returns.returnedQuestions} share=${pct(a.returns.returnShare)} returnCorrect=${pct(a.returns.returnCorrectRate)} firstPassCorrect=${pct(a.returns.firstPassCorrectRate)} gap=${pct(a.returns.correctnessGap)} medianGap=${a.returns.medianGapInVisits}`);
+console.log(
+  '\nreturns:',
+  `blankFirst=${a.returns.blankFirstQuestions} returned=${a.returns.returnedQuestions} share=${pct(a.returns.returnShare)} returnCorrect=${pct(a.returns.returnCorrectRate)} firstPassCorrect=${pct(a.returns.firstPassCorrectRate)} gap=${pct(a.returns.correctnessGap)} medianGap=${a.returns.medianGapInVisits}`,
+);
 for (const row of a.returns.byBlankState) {
-  console.log(`  ${row.blankState}: n=${row.total} ` + ['C','W','V','R'].map((s) => `${s}=${pct(row.shares.get(s as never) ?? 0)}`).join(' ') + ` correct=${pct(row.correctRate)}`);
+  console.log(
+    `  ${row.blankState}: n=${row.total} ` +
+      ['C', 'W', 'V', 'R'].map((s) => `${s}=${pct(row.shares.get(s as never) ?? 0)}`).join(' ') +
+      ` correct=${pct(row.correctRate)}`,
+  );
 }
 console.log('\nposition bins:', a.positionBins.map((b) => b.count).join(','));
 console.log('delta bins:', a.deltaBins.map((b) => `${b.label}:${b.count}`).join(' '));

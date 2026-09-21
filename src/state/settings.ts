@@ -135,11 +135,26 @@ export function settingsFromParams(params: URLSearchParams): Settings {
   return {
     seed: params.get('seed')?.slice(0, 60) || d.seed,
     studentCount: Math.round(
-      parseNumber(params.get('n'), d.studentCount, LIMITS.studentCount.min, LIMITS.studentCount.max),
+      parseNumber(
+        params.get('n'),
+        d.studentCount,
+        LIMITS.studentCount.min,
+        LIMITS.studentCount.max,
+      ),
     ),
     topics: parseTopics(params),
-    blankRate: parseNumber(params.get('blank'), d.blankRate, LIMITS.blankRate.min, LIMITS.blankRate.max),
-    rapidRate: parseNumber(params.get('rapid'), d.rapidRate, LIMITS.rapidRate.min, LIMITS.rapidRate.max),
+    blankRate: parseNumber(
+      params.get('blank'),
+      d.blankRate,
+      LIMITS.blankRate.min,
+      LIMITS.blankRate.max,
+    ),
+    rapidRate: parseNumber(
+      params.get('rapid'),
+      d.rapidRate,
+      LIMITS.rapidRate.min,
+      LIMITS.rapidRate.max,
+    ),
     blankThenReturnProbability: parseNumber(
       params.get('ret'),
       d.blankThenReturnProbability,

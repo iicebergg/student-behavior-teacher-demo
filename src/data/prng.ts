@@ -63,12 +63,12 @@ export function createRng(seed: number | string): Rng {
       const value = medianSeconds * Math.exp(rng.normal(0, sigma));
       return Math.round(Math.min(max, Math.max(min, value)));
     },
-    pick: <T,>(items: readonly T[]): T => {
+    pick: <T>(items: readonly T[]): T => {
       const item = items[Math.floor(next() * items.length)];
       if (item === undefined) throw new Error('pick() called on an empty array');
       return item;
     },
-    shuffle: <T,>(items: readonly T[]): T[] => {
+    shuffle: <T>(items: readonly T[]): T[] => {
       const out = [...items];
       for (let i = out.length - 1; i > 0; i -= 1) {
         const j = Math.floor(next() * (i + 1));

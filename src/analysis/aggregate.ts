@@ -23,8 +23,9 @@ export interface QuestionAggregate {
   blankFirstShare: number;
   /** Of those, the share that came back and answered. */
   returnShare: number;
-  /** Share of students with a changepoint anchored on this question. */
+  /** Share of students with at least one changepoint anchored on this question. */
   changepointShare: number;
+  /** The same, for negative changepoints. */
   negativeChangepointShare: number;
   /** Share of students whose final answer here was correct. */
   accuracy: number;
@@ -50,8 +51,11 @@ export function computeAggregate(
   const returnedByQuestion = new Map<number, number>();
   const correctByQuestion = new Map<number, number>();
   const studentsByQuestion = new Map<number, number>();
-  const changepointsByQuestion = new Map<number, number>();
-  const negativeByQuestion = new Map<number, number>();
+  // Counted as distinct students, not raw changepoints: a student who visits a
+  // question twice could anchor two, and mixing a count into a chart of shares
+  // would put two different units on one axis.
+  const changepointStudents = new Map<number, Set<string>>();
+  const negativeStudents = new Map<number, Set<string>>();
 
   for (const question of questions) {
     visitsByQuestion.set(question.questionNumber, []);
@@ -59,8 +63,8 @@ export function computeAggregate(
     returnedByQuestion.set(question.questionNumber, 0);
     correctByQuestion.set(question.questionNumber, 0);
     studentsByQuestion.set(question.questionNumber, 0);
-    changepointsByQuestion.set(question.questionNumber, 0);
-    negativeByQuestion.set(question.questionNumber, 0);
+    changepointStudents.set(question.questionNumber, new Set());
+    negativeStudents.set(question.questionNumber, new Set());
   }
 
   for (const attempt of attempts) {
@@ -86,10 +90,8 @@ export function computeAggregate(
 
   for (const changepoint of changepoints) {
     const n = changepoint.questionNumber;
-    changepointsByQuestion.set(n, (changepointsByQuestion.get(n) ?? 0) + 1);
-    if (changepoint.isNegative) {
-      negativeByQuestion.set(n, (negativeByQuestion.get(n) ?? 0) + 1);
-    }
+    changepointStudents.get(n)?.add(changepoint.studentId);
+    if (changepoint.isNegative) negativeStudents.get(n)?.add(changepoint.studentId);
   }
 
   const studentCount = attempts.length;
@@ -120,9 +122,10 @@ export function computeAggregate(
       blankVisitShare: visits.length > 0 ? blankVisits / visits.length : 0,
       blankFirstShare: reached > 0 ? blankFirst / reached : 0,
       returnShare: blankFirst > 0 ? (returnedByQuestion.get(n) ?? 0) / blankFirst : 0,
-      changepointShare: studentCount > 0 ? (changepointsByQuestion.get(n) ?? 0) / studentCount : 0,
+      changepointShare:
+        studentCount > 0 ? (changepointStudents.get(n)?.size ?? 0) / studentCount : 0,
       negativeChangepointShare:
-        studentCount > 0 ? (negativeByQuestion.get(n) ?? 0) / studentCount : 0,
+        studentCount > 0 ? (negativeStudents.get(n)?.size ?? 0) / studentCount : 0,
       accuracy: reached > 0 ? (correctByQuestion.get(n) ?? 0) / reached : 0,
       medianSeconds: medianVisitSeconds.get(n) ?? 0,
       rapidThreshold: rapidThresholds.get(n) ?? 0,

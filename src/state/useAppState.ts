@@ -14,8 +14,21 @@ import type { GenerationSettings, Settings, TopicSetting } from './settings';
 import { DEFAULT_SETTINGS, loadSettings, saveSettings } from './settings';
 
 const SEED_WORDS = [
-  'algebra', 'quartile', 'vertex', 'radian', 'lattice', 'isosceles', 'tangent',
-  'median', 'scalene', 'parabola', 'ratio', 'vector', 'prism', 'chord', 'locus',
+  'algebra',
+  'quartile',
+  'vertex',
+  'radian',
+  'lattice',
+  'isosceles',
+  'tangent',
+  'median',
+  'scalene',
+  'parabola',
+  'ratio',
+  'vector',
+  'prism',
+  'chord',
+  'locus',
 ];
 
 /** A fresh, readable seed for the Regenerate button. */
@@ -100,10 +113,7 @@ export function useAppState(): AppState {
 }
 
 /** Track an element's rendered width, so SVG coordinates can map to screen px. */
-export function useElementWidth<T extends HTMLElement>(): [
-  (node: T | null) => void,
-  number,
-] {
+export function useElementWidth<T extends HTMLElement>(): [(node: T | null) => void, number] {
   const [width, setWidth] = useState(0);
   const [node, setNode] = useState<T | null>(null);
 

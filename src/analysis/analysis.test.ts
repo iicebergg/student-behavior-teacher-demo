@@ -173,11 +173,7 @@ describe('changepoints', () => {
   });
 
   it('anchors on the visit where the new state starts', () => {
-    const changepoints = attemptChangepoints(
-      attemptOf(['C', 'W']),
-      questionsOf([0, 4]),
-      K3,
-    );
+    const changepoints = attemptChangepoints(attemptOf(['C', 'W']), questionsOf([0, 4]), K3);
     expect(changepoints[0]?.questionNumber).toBe(2);
     expect(changepoints[0]?.topicId).toBe(4);
   });
@@ -271,7 +267,10 @@ describe('changepoints', () => {
 describe('histograms', () => {
   it('bins changepoint positions on a 0..1 temporal axis', () => {
     const attempt = attemptOf(['C', 'W', 'C', 'W', 'C', 'W', 'C', 'W', 'C', 'W']);
-    const bins = positionHistogram(attemptChangepoints(attempt, questionsOf(Array(10).fill(0)), K3), 10);
+    const bins = positionHistogram(
+      attemptChangepoints(attempt, questionsOf(Array(10).fill(0)), K3),
+      10,
+    );
     expect(bins.length).toBe(10);
     // 9 changepoints, at positions 0.1 .. 0.9; none at the first bin.
     expect(bins[0]?.count).toBe(0);
@@ -294,10 +293,7 @@ describe('per-topic negative-changepoint lift', () => {
 
   it('scores a topic against the overall negative-changepoint rate', () => {
     // Q2 and Q4 are topic 0; both anchor a negative changepoint.
-    const attempt = attemptOf(
-      ['C', 'W', 'C', 'W', 'C'],
-      [true, false, true, false, true],
-    );
+    const attempt = attemptOf(['C', 'W', 'C', 'W', 'C'], [true, false, true, false, true]);
     const questions = questionsOf([1, 0, 1, 0, 1]);
     const changepoints = attemptChangepoints(attempt, questions, {
       changepointWindowK: 1,
@@ -328,17 +324,37 @@ describe('per-topic negative-changepoint lift', () => {
 });
 
 describe('returns', () => {
-  const topics: Topic[] = [
-    { id: 0, label: 'Topic A', difficultyWeight: 0.5, isTrigger: false },
-  ];
+  const topics: Topic[] = [{ id: 0, label: 'Topic A', difficultyWeight: 0.5, isTrigger: false }];
   const questions = questionsOf([0, 0, 0]);
 
   /** Q1 skipped fast then answered correctly on a return; Q2 answered; Q3 blank forever. */
   function attemptWithReturn(): Attempt {
-    const blank = visit({ pathIndex: 0, state: 'BF', questionNumber: 1, leftBlank: true, durationSeconds: 2, answerChangesInVisit: 0, selectedChoice: null });
+    const blank = visit({
+      pathIndex: 0,
+      state: 'BF',
+      questionNumber: 1,
+      leftBlank: true,
+      durationSeconds: 2,
+      answerChangesInVisit: 0,
+      selectedChoice: null,
+    });
     const answered = visit({ pathIndex: 1, state: 'W', questionNumber: 2 });
-    const stillBlank = visit({ pathIndex: 2, state: 'BS', questionNumber: 3, leftBlank: true, durationSeconds: 90, answerChangesInVisit: 0, selectedChoice: null });
-    const returned = visit({ pathIndex: 3, state: 'C', questionNumber: 1, wasCorrect: true, isReturn: true });
+    const stillBlank = visit({
+      pathIndex: 2,
+      state: 'BS',
+      questionNumber: 3,
+      leftBlank: true,
+      durationSeconds: 90,
+      answerChangesInVisit: 0,
+      selectedChoice: null,
+    });
+    const returned = visit({
+      pathIndex: 3,
+      state: 'C',
+      questionNumber: 1,
+      wasCorrect: true,
+      isReturn: true,
+    });
     const byQuestion = new Map<number, QuestionOutcome>([
       [1, { questionNumber: 1, visits: [blank, returned], terminalOutcome: 'correct' }],
       [2, { questionNumber: 2, visits: [answered], terminalOutcome: 'incorrect' }],

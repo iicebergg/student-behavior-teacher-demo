@@ -21,7 +21,11 @@ export function Card({
       <div className="card-head">
         <div>
           <h2>{title}</h2>
-          {subtitle !== undefined && <p className="card-note" style={{ margin: '2px 0 0' }}>{subtitle}</p>}
+          {subtitle !== undefined && (
+            <p className="card-note" style={{ margin: '2px 0 0' }}>
+              {subtitle}
+            </p>
+          )}
         </div>
         {actions}
       </div>

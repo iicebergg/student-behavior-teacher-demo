@@ -149,7 +149,12 @@ export function positionHistogram(
   binCount = 10,
 ): HistogramBin[] {
   const bins = emptyBins(0, 1, binCount, (v) => v.toFixed(1));
-  fill(bins, changepoints.map((cp) => cp.position), 0, 1);
+  fill(
+    bins,
+    changepoints.map((cp) => cp.position),
+    0,
+    1,
+  );
   return bins;
 }
 

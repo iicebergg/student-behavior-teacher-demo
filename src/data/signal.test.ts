@@ -28,8 +28,7 @@ function blankToBlankLift(): number {
     fromBlank += analysis.transitions.rowTotals.get(from) ?? 0;
     for (const to of blanks) blankToBlank += analysis.transitions.get(from, to).count;
   }
-  const blankShare =
-    (analysis.stateShares.get('BF') ?? 0) + (analysis.stateShares.get('BS') ?? 0);
+  const blankShare = (analysis.stateShares.get('BF') ?? 0) + (analysis.stateShares.get('BS') ?? 0);
   if (fromBlank === 0 || blankShare === 0) return 0;
   return blankToBlank / fromBlank / blankShare;
 }
