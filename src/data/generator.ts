@@ -87,7 +87,7 @@ const FATIGUE_ACCURACY = 0.35;
 /** Baseline accuracy offset, so an average student on an average item is ~60%. */
 const ABILITY_BASELINE = 3.0;
 /** Ability bonus on a return visit -- the gap between visits pays off. */
-const RETURN_IMPROVEMENT = 0.85;
+const RETURN_IMPROVEMENT = 1.35;
 /** Extra bonus when the skip was a slow abandonment: they had already engaged. */
 const RETURN_BONUS_AFTER_SLOW_BLANK = 0.3;
 /** Rapid visits are close to guessing. */
@@ -407,8 +407,11 @@ function simulateStudent(
   }
 
   // --- Return pass ---------------------------------------------------------
+  // Not in strict question order: students go back to the ones they think they
+  // can still get, so the sweep back jumps around. That is also what makes the
+  // return block a run of real transitions rather than one long march forward.
   progress = 1;
-  for (const entry of pending) {
+  for (const entry of rng.shuffle(pending)) {
     makeReturnVisit(entry);
   }
 

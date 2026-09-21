@@ -163,7 +163,7 @@ export function positionHistogram(
  */
 export function deltaHistogram(
   changepoints: readonly Changepoint[],
-  binsPerSide = 5,
+  binsPerSide = 4,
 ): HistogramBin[] {
   const width = 1 / binsPerSide;
   const format = (v: number) => (v === 0 ? '0' : v.toFixed(1));
